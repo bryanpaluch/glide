@@ -279,6 +279,13 @@ func (r *Resolver) ResolveLocal(deep bool) ([]string, error) {
 			imps = p.Imports
 		}
 
+		// Add subpackages to imports so we can skip their lookup and work around an issue
+		for _, dep := range r.Config.Imports {
+			for _, sub := range dep.Subpackages {
+				alreadySeen[dep.Name+"/"+sub] = true
+			}
+		}
+
 		// We are only looking for dependencies in vendor. No root, cgo, etc.
 		for _, imp := range imps {
 			if alreadySeen[imp] {
